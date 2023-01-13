@@ -1,12 +1,12 @@
 import Header from "../../components/Header";
 import { useEffect, useMemo, useState } from "react";
-import { useWeb3 } from "@3rdweb/hooks";
-import { ThirdwebSDK } from "@3rdweb/sdk";
+import { useContract, useAddress } from "@thirdweb-dev/react";
 import { useRouter } from "next/router";
 import NFTImage from "../../components/nft/NFTImage";
 import GeneralDetails from "../../components/nft/GeneralDetails";
 import ItemActivity from "../../components/nft/ItemActivity";
 import Purchase from "../../components/nft/Purchase";
+import { CgLayoutGrid } from "react-icons/cg";
 
 const style = {
   wrapper: `flex flex-col items-center container-lg text-[#e5e8eb]`,
@@ -17,53 +17,54 @@ const style = {
 };
 
 const Nft = () => {
-  const { provider } = useWeb3();
-  const [selectedNft, setSelectedNft] = useState();
+  const [selectedNft, setSelectedNft] = useState({});
   const [listings, setListings] = useState([]);
   const router = useRouter();
+  const address = useAddress();
 
-  const nftModule = useMemo(() => {
-    if (!provider) return;
+  const isAddress = useMemo(() => haveAddress(address), [address]);
+  function haveAddress(address) {
+    if (!address) return;
+  }
 
-    const sdk = new ThirdwebSDK(
-      provider.getSigner(),
-      "https://eth-goerli.g.alchemy.com/v2/dmRPbV7LZB0ctGKvp5TRLm4p3nkgjTvQ"
-    );
-    return sdk.getNFTModule("0xF9196bd1b6DD684DfF8cBaE465AE3CE0b1Ed6d61");
-  }, [provider]);
-
-  // get all NFTs in the collection
+  const { contract: nftModule } = useContract(
+    "0x7bBeB929392E104BAB9f4D72d6472cf849360E8f",
+    "nft-collection"
+  );
+  console.log(`the nftid module is${nftModule}`);
   useEffect(() => {
     if (!nftModule) return;
     (async () => {
       const nfts = await nftModule.getAll();
 
-      const selectedNftItem = nfts.find((nft) => nft.id === router.query.nftid);
+      // const selectedNftItem = nfts.map((nft) => {
+      //   if (nft.metadata.id === router.query.nftid) {
+      //     console.log(`Nft is found with name ${nft.metadata.name}`);
+      //     return nft;
+      //   }
+      // });
+      const selectedNftItem = nfts.map((nft) => {
+        if (nft.metadata.id === router.query.nftid) {
+          setSelectedNft(nft);
+          return;
+        }
+      });
 
-      setSelectedNft(selectedNftItem);
+      // setSelectedNft(selectedNftItem);
     })();
   }, [nftModule]);
 
-  const marketPlaceModule = useMemo(() => {
-    if (!provider) return;
-
-    const sdk = new ThirdwebSDK(
-      provider.getSigner(),
-      "https://eth-goerli.g.alchemy.com/v2/dmRPbV7LZB0ctGKvp5TRLm4p3nkgjTvQ"
-    );
-
-    return sdk.getMarketplaceModule(
-      "0x8F59593DB8C4Fd7A5DB27c6ec9443074e92AF85C"
-    );
-  }, [provider]);
-
+  const { contract: marketPlaceModule } = useContract(
+    "0x933771f3bABB03a29a2AC79ED015748Edbe8973B",
+    "marketplace"
+  );
   useEffect(() => {
     if (!marketPlaceModule) return;
     (async () => {
       setListings(await marketPlaceModule.getAllListings());
     })();
   }, [marketPlaceModule]);
-
+  console.log(`the selected nft is ${selectedNft}`);
   return (
     <div>
       <Header />
@@ -71,7 +72,7 @@ const Nft = () => {
         <div className={style.container}>
           <div className={style.topContent}>
             <div className={style.nftImgContainer}>
-              <NFTImage selectedNft={selectedNft} />
+              <NFTImage selectedNft={selectedNft.metadata} />
             </div>
             <div className={style.detailsContainer}>
               <GeneralDetails selectedNft={selectedNft} />
@@ -81,6 +82,7 @@ const Nft = () => {
                 listings={listings}
                 marketPlaceModule={marketPlaceModule}
               />
+              ;
             </div>
           </div>
           <ItemActivity />

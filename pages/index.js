@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Header from "../components/Header";
 import Hero from "../components/Hero";
-import { useWeb3 } from "@3rdweb/hooks";
+import { useAddress, useMetamask } from "@thirdweb-dev/react";
 import { useEffect } from "react";
 import { client } from "../lib/sanityClient";
 import toast, { Toaster } from "react-hot-toast";
@@ -14,8 +14,9 @@ const style = {
 };
 
 export default function Home() {
-  const { address, connectWallet } = useWeb3();
-
+  const address = useAddress();
+  const connectWithMetamask = useMetamask();
+  console.log(`here is the addressssss${address}`);
   const welcomeUser = (userName, toastHandler = toast) => {
     toastHandler.success(
       `Welcome back${userName !== "Unnamed" ? ` ${userName}` : ""}!`,
@@ -54,10 +55,7 @@ export default function Home() {
         </>
       ) : (
         <div className={style.walletConnectWrapper}>
-          <button
-            className={style.button}
-            onClick={() => connectWallet("injected")}
-          >
+          <button className={style.button} onClick={connectWithMetamask}>
             Connect Wallet
           </button>
           <div className={style.details}>

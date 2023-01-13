@@ -1,17 +1,12 @@
 import "../styles/globals.css";
-import { ThirdwebWeb3Provider } from "@3rdweb/hooks";
+import { ChainId, ThirdwebProvider } from "@thirdweb-dev/react";
 
-const supportedChainIds = [5];
-const connectors = {
-  injected: {},
-};
-export default function App({ Component, pageProps }) {
+function MyApp({ Component, pageProps }) {
   return (
-    <ThirdwebWeb3Provider
-      supportedChainIds={supportedChainIds}
-      connectors={connectors}
-    >
+    <ThirdwebProvider desiredChainId={ChainId.Goerli}>
       <Component {...pageProps} />
-    </ThirdwebWeb3Provider>
+    </ThirdwebProvider>
   );
 }
+
+export default MyApp;

@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { useWeb3 } from "@3rdweb/hooks";
+import { useAddress, useMetamask } from "@thirdweb-dev/react";
+import { useContract } from "@thirdweb-dev/react";
 import { client } from "../../lib/sanityClient";
-import { ThirdwebSDK } from "@3rdweb/sdk";
+
 import Header from "../../components/Header";
 import { CgWebsite } from "react-icons/cg";
 import { AiOutlineInstagram, AiOutlineTwitter } from "react-icons/ai";
@@ -34,45 +35,45 @@ const style = {
 
 const Collection = () => {
   const router = useRouter();
-  const { provider } = useWeb3();
+  const address = useAddress();
+
+  console.log(`The provider is ${address}`);
   const { collectionId } = router.query;
   const [collection, setCollection] = useState({});
   const [nfts, setNfts] = useState([]);
   const [listings, setListings] = useState([]);
-  console.log(`collection id at first ${collectionId}`);
-  //
 
-  const nftModule = useMemo(() => {
-    if (!provider) return;
+  // const nftModule = useMemo(() => {
+  //   if (!address) return;
 
-    const sdk = new ThirdwebSDK(
-      provider.getSigner(),
-      "https://eth-goerli.g.alchemy.com/v2/dmRPbV7LZB0ctGKvp5TRLm4p3nkgjTvQ"
-    );
-    return sdk.getNFTModule(collectionId);
-  }, [provider]);
+  //   const { contract: nftCollection } = useContract(
+  //     collectionId,
+  //     "nft-collection"
+  //   );
 
+  //   return nftCollection;
+  // }, [address]);
+
+  const isAddress = useMemo(() => haveAddress(address), [address]);
+  function haveAddress(address) {
+    if (!address) return;
+  }
+  const { contract: nftModule } = useContract(collectionId, "nft-collection");
+  console.log(`nft module is ${nftModule}`);
   // get all NFTs in the collection
   useEffect(() => {
     if (!nftModule) return;
+
     (async () => {
       const nfts = await nftModule.getAll();
-
       setNfts(nfts);
     })();
   }, [nftModule]);
 
-  const marketPlaceModule = useMemo(() => {
-    if (!provider) return;
-
-    const sdk = new ThirdwebSDK(
-      provider.getSigner(),
-      "https://eth-goerli.g.alchemy.com/v2/dmRPbV7LZB0ctGKvp5TRLm4p3nkgjTvQ"
-    );
-    return sdk.getMarketplaceModule(
-      "0x8F59593DB8C4Fd7A5DB27c6ec9443074e92AF85C"
-    );
-  }, [provider]);
+  const { contract: marketPlaceModule } = useContract(
+    "0x933771f3bABB03a29a2AC79ED015748Edbe8973B",
+    "marketplace"
+  );
 
   // get all listings in the collection
   useEffect(() => {
@@ -205,9 +206,9 @@ const Collection = () => {
         </div>
       </div>
       <div className="flex flex-wrap ">
-        {nfts.map((nftItem, id) => (
+        {nfts.map((nftItem) => (
           <NFTCard
-            key={id}
+            key={nftItem.metadata.id}
             nftItem={nftItem}
             title={collection?.title}
             listings={listings}

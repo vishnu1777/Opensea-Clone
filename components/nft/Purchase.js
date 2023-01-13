@@ -19,7 +19,9 @@ const MakeOffer = ({ isListed, selectedNft, listings, marketPlaceModule }) => {
     if (!listings || isListed === "false") return;
     (async () => {
       setSelectedMarketNft(
-        listings.find((marketNft) => marketNft.asset?.id === selectedNft.id)
+        listings.find(
+          (marketNft) => marketNft.asset?.id === selectedNft.metadata.id
+        )
       );
     })();
   }, [selectedNft, listings, isListed]);
@@ -43,22 +45,9 @@ const MakeOffer = ({ isListed, selectedNft, listings, marketPlaceModule }) => {
     quantityDesired = 1,
     module = marketPlaceModule
   ) => {
-    console.log(listingId, quantityDesired, module, "david");
-    // yo RAZA lets goooo!!!
-    //yo Qazi, ok
-    // sure okay about to run it...
-    // just clicked buy now...
-    // still error
-    // where can i see the contract address of the marketplace module
-    // in [nftId.js]
+    console.log(listingId, quantityDesired, module, "Vishnu");
 
-    await module
-      .buyoutDirectListing({
-        listingId: listingId,
-        quantityDesired: quantityDesired,
-        receiver: "0x06999fD04020e0145bc8897f7D3ddE3367Da8c0d",
-      })
-      .catch((error) => console.error(error));
+    await module.buyoutListing(listingId, quantityDesired);
 
     confirmPurchase();
   };
@@ -70,7 +59,7 @@ const MakeOffer = ({ isListed, selectedNft, listings, marketPlaceModule }) => {
         <>
           <div
             onClick={() => {
-              enableButton ? buyItem(selectedMarketNft.id, 1) : null;
+              enableButton ? buyItem() : null;
             }}
             className={`${style.button} bg-[#2081e2] hover:bg-[#42a0ff]`}
           >

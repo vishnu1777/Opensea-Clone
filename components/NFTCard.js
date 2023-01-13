@@ -24,15 +24,13 @@ const NFTCard = ({ nftItem, title, listings }) => {
   const [price, setPrice] = useState(0);
 
   useEffect(() => {
-    const listing = listings.find((listing) => listing.asset.id === nftItem.id);
+    const listing = listings.find(
+      (listing) => listing.asset.id === nftItem.metadata.id
+    );
     if (Boolean(listing)) {
       setIsListed(true);
-      console.log(
-        listing.buyoutCurrencyValuePerToken.displayValue / 1000000000000000000
-      );
-      setPrice(
-        listing.buyoutCurrencyValuePerToken.displayValue / 1000000000000000000
-      );
+      console.log(listing.buyoutCurrencyValuePerToken.displayValue);
+      setPrice(listing.buyoutCurrencyValuePerToken.displayValue);
     }
   }, [listings, nftItem]);
 
@@ -41,13 +39,17 @@ const NFTCard = ({ nftItem, title, listings }) => {
       className={style.wrapper}
       onClick={() => {
         Router.push({
-          pathname: `/nfts/${nftItem.id}`,
+          pathname: `/nfts/${nftItem.metadata.id}`,
           query: { isListed: isListed },
         });
       }}
     >
       <div className={style.imgContainer}>
-        <img src={nftItem.image} alt={nftItem.name} className={style.nftImg} />
+        <img
+          src={nftItem.metadata.image}
+          alt={nftItem.name}
+          className={style.nftImg}
+        />
       </div>
       <div className={style.details}>
         <div className={style.info}>
