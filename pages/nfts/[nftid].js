@@ -17,54 +17,57 @@ const style = {
 };
 
 const Nft = () => {
-  const [selectedNft, setSelectedNft] = useState({});
-  const [listings, setListings] = useState([]);
   const router = useRouter();
   const address = useAddress();
+  const [selectedNft, setSelectedNft] = useState([]);
+  const [listings, setListings] = useState([]);
 
-  const isAddress = useMemo(() => haveAddress(address), [address]);
-  function haveAddress(address) {
-    if (!address) return;
-  }
-
-  const { contract: nftModule } = useContract(
+  // nft collection section
+  const { contract: nftModules } = useContract(
     "0x7bBeB929392E104BAB9f4D72d6472cf849360E8f",
     "nft-collection"
   );
-  console.log(`the nftid module is${nftModule}`);
+
+  const nftModule = useMemo(() => {
+    if (!address) return;
+    return nftModules;
+  }, [selectedNft]);
+
   useEffect(() => {
     if (!nftModule) return;
     (async () => {
       const nfts = await nftModule.getAll();
 
-      // const selectedNftItem = nfts.map((nft) => {
-      //   if (nft.metadata.id === router.query.nftid) {
-      //     console.log(`Nft is found with name ${nft.metadata.name}`);
-      //     return nft;
-      //   }
-      // });
       const selectedNftItem = nfts.map((nft) => {
         if (nft.metadata.id === router.query.nftid) {
-          setSelectedNft(nft);
+          console.log(`here we select ${nft.metadata.id}`);
+
+          setSelectedNft(nft.metadata);
+
           return;
         }
       });
-
-      // setSelectedNft(selectedNftItem);
     })();
   }, [nftModule]);
 
-  const { contract: marketPlaceModule } = useContract(
+  // Maket place module section
+  const { contract: marketPlaceModules } = useContract(
     "0x933771f3bABB03a29a2AC79ED015748Edbe8973B",
     "marketplace"
   );
+
+  const marketPlaceModule = useMemo(() => {
+    if (!address) return;
+    return marketPlaceModules;
+  }, [marketPlaceModules]);
+
   useEffect(() => {
     if (!marketPlaceModule) return;
     (async () => {
-      setListings(await marketPlaceModule.getAllListings());
+      setListings(await marketPlaceModule.getActiveListings());
     })();
-  }, [marketPlaceModule]);
-  console.log(`the selected nft is ${selectedNft}`);
+  }, [marketPlaceModules]);
+
   return (
     <div>
       <Header />
@@ -72,7 +75,7 @@ const Nft = () => {
         <div className={style.container}>
           <div className={style.topContent}>
             <div className={style.nftImgContainer}>
-              <NFTImage selectedNft={selectedNft.metadata} />
+              <NFTImage selectedNft={selectedNft} />
             </div>
             <div className={style.detailsContainer}>
               <GeneralDetails selectedNft={selectedNft} />
@@ -82,7 +85,6 @@ const Nft = () => {
                 listings={listings}
                 marketPlaceModule={marketPlaceModule}
               />
-              ;
             </div>
           </div>
           <ItemActivity />

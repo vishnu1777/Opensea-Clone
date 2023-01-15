@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/router";
-import Link from "next/link";
-import { useAddress, useMetamask } from "@thirdweb-dev/react";
+import { useAddress } from "@thirdweb-dev/react";
 import { useContract } from "@thirdweb-dev/react";
 import { client } from "../../lib/sanityClient";
-
 import Header from "../../components/Header";
 import { CgWebsite } from "react-icons/cg";
 import { AiOutlineInstagram, AiOutlineTwitter } from "react-icons/ai";
@@ -36,54 +34,54 @@ const style = {
 const Collection = () => {
   const router = useRouter();
   const address = useAddress();
-
-  console.log(`The provider is ${address}`);
   const { collectionId } = router.query;
   const [collection, setCollection] = useState({});
   const [nfts, setNfts] = useState([]);
   const [listings, setListings] = useState([]);
 
-  // const nftModule = useMemo(() => {
-  //   if (!address) return;
+  console.log(`The Provider is ${address}`);
 
-  //   const { contract: nftCollection } = useContract(
-  //     collectionId,
-  //     "nft-collection"
-  //   );
+  // get the nft-collection
+  const { contract: nftModules } = useContract(collectionId, "nft-collection");
 
-  //   return nftCollection;
-  // }, [address]);
-
-  const isAddress = useMemo(() => haveAddress(address), [address]);
-  function haveAddress(address) {
+  const nftModule = useMemo(() => {
     if (!address) return;
-  }
-  const { contract: nftModule } = useContract(collectionId, "nft-collection");
-  console.log(`nft module is ${nftModule}`);
+    return nftModules;
+  }, [nftModules]);
+
   // get all NFTs in the collection
   useEffect(() => {
-    if (!nftModule) return;
-
+    if (!nftModule) {
+      return;
+    }
     (async () => {
-      const nfts = await nftModule.getAll();
-      setNfts(nfts);
+      try {
+        const nfts = await nftModule.getAll();
+        setNfts(nfts);
+      } catch (e) {
+        console.log(e);
+      }
     })();
   }, [nftModule]);
 
-  const { contract: marketPlaceModule } = useContract(
+  // Get our marketplace contract
+  const { contract: marketPlaceModules } = useContract(
     "0x933771f3bABB03a29a2AC79ED015748Edbe8973B",
     "marketplace"
   );
-
-  // get all listings in the collection
+  const marketPlaceModule = useMemo(() => {
+    if (!address) return;
+    return marketPlaceModules;
+  }, [address, marketPlaceModules]);
+  // get all listings in the our marketplace
   useEffect(() => {
     if (!marketPlaceModule) return;
     (async () => {
-      setListings(await marketPlaceModule.getAllListings());
+      setListings(await marketPlaceModule.getActiveListings());
     })();
   }, [marketPlaceModule]);
-  console.log(`The collection id is ${collectionId}`);
 
+  // query the user data from our sanity by using our GROQ query
   const fetchCollectionData = async (sanityClient = client) => {
     const query = `*[_type == "marketItems" && contractAddress == "${collectionId}" ] {
       "imageUrl": profileImage.asset->url,
@@ -109,8 +107,6 @@ const Collection = () => {
     fetchCollectionData();
   }, [collectionId]);
 
-  console.log(router.query);
-  console.log(router.query.collectionId);
   return (
     <div className="overflow-hidden">
       <Header />

@@ -19,9 +19,7 @@ const MakeOffer = ({ isListed, selectedNft, listings, marketPlaceModule }) => {
     if (!listings || isListed === "false") return;
     (async () => {
       setSelectedMarketNft(
-        listings.find(
-          (marketNft) => marketNft.asset?.id === selectedNft.metadata.id
-        )
+        listings.find((marketNft) => marketNft.asset?.id === selectedNft.id)
       );
     })();
   }, [selectedNft, listings, isListed]);
@@ -46,10 +44,13 @@ const MakeOffer = ({ isListed, selectedNft, listings, marketPlaceModule }) => {
     module = marketPlaceModule
   ) => {
     console.log(listingId, quantityDesired, module, "Vishnu");
+    try {
+      await module.buyoutListing(listingId, quantityDesired);
 
-    await module.buyoutListing(listingId, quantityDesired);
-
-    confirmPurchase();
+      confirmPurchase();
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (

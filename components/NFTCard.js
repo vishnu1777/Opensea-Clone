@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BiHeart } from "react-icons/bi";
 import Router from "next/router";
+import { GiPerspectiveDiceSixFacesThree } from "react-icons/gi";
 
 const style = {
   wrapper: `bg-[#303339] flex-auto w-[14rem] h-[22rem] my-10 mx-5 rounded-2xl overflow-hidden cursor-pointer`,
@@ -22,16 +23,18 @@ const style = {
 const NFTCard = ({ nftItem, title, listings }) => {
   const [isListed, setIsListed] = useState(false);
   const [price, setPrice] = useState(0);
-
+  console.log("Render before");
   useEffect(() => {
     const listing = listings.find(
       (listing) => listing.asset.id === nftItem.metadata.id
     );
     if (Boolean(listing)) {
       setIsListed(true);
-      console.log(listing.buyoutCurrencyValuePerToken.displayValue);
       setPrice(listing.buyoutCurrencyValuePerToken.displayValue);
+    } else {
+      setPrice(null);
     }
+    console.log("Render After");
   }, [listings, nftItem]);
 
   return (
