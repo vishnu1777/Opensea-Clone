@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { useAddress, useMetamask } from "@thirdweb-dev/react";
 import openseaLogo from "../assets/opensea.png";
 import { AiOutlineSearch } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
@@ -19,6 +20,8 @@ const style = {
 };
 
 const Header = () => {
+  const connectWithMetamask = useMetamask();
+  const address = useAddress();
   return (
     <div className={style.wrapper}>
       <Link href="/">
@@ -43,11 +46,14 @@ const Header = () => {
         <div className={style.headerItem}> Stats </div>
         <div className={style.headerItem}> Resources </div>
         <div className={style.headerItem}> Create </div>
+        <Link href={`/myNfts/${address}`}>
+          <div className={style.headerItem}>Your Nfts</div>
+        </Link>
         <div className={style.headerIcon}>
           <CgProfile />
         </div>
         <div className={style.headerIcon}>
-          <MdOutlineAccountBalanceWallet />
+          <MdOutlineAccountBalanceWallet onClick={connectWithMetamask} />
         </div>
       </div>
     </div>

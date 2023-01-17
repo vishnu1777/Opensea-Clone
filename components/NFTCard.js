@@ -23,7 +23,7 @@ const style = {
 const NFTCard = ({ nftItem, title, listings }) => {
   const [isListed, setIsListed] = useState(false);
   const [price, setPrice] = useState(0);
-  console.log("Render before");
+
   useEffect(() => {
     const listing = listings.find(
       (listing) => listing.asset.id === nftItem.metadata.id

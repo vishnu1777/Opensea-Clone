@@ -31,10 +31,10 @@ const style = {
   description: `text-[#8a939b] text-xl w-max-1/4 flex-wrap mt-4`,
 };
 
-const Collection = () => {
+const MyNfts = () => {
   const router = useRouter();
   const address = useAddress();
-  const { collectionId } = router.query;
+
   const [collection, setCollection] = useState({});
   const [nfts, setNfts] = useState([]);
   const [listings, setListings] = useState([]);
@@ -42,7 +42,10 @@ const Collection = () => {
   console.log(`The Provider is ${address}`);
 
   // get the nft-collection
-  const { contract: nftModules } = useContract(collectionId, "nft-collection");
+  const { contract: nftModules } = useContract(
+    "0x7bBeB929392E104BAB9f4D72d6472cf849360E8f",
+    "nft-collection"
+  );
 
   const nftModule = useMemo(() => {
     if (!address) return;
@@ -56,7 +59,7 @@ const Collection = () => {
     }
     (async () => {
       try {
-        const nfts = await nftModule.getAll();
+        const nfts = await nftModule.getOwned(address);
         setNfts(nfts);
       } catch (e) {
         console.log(e);
@@ -84,7 +87,7 @@ const Collection = () => {
 
   // query the user data from our sanity by using our GROQ query
   const fetchCollectionData = async (sanityClient = client) => {
-    const query = `*[_type == "marketItems" && contractAddress == "${collectionId}" ] {
+    const query = `*[_type == "marketItems" && contractAddress == "0x7bBeB929392E104BAB9f4D72d6472cf849360E8f" ] {
       "imageUrl": profileImage.asset->url,
       "bannerImageUrl": bannerImage.asset->url,
       volumeTraded,
@@ -95,7 +98,7 @@ const Collection = () => {
       "allOwners": owners[]->,
       description
     }`;
-    
+
     // console.log(`this is the image uri:${query.imageUrl}`);
     const collectionData = await sanityClient.fetch(query);
 
@@ -107,7 +110,7 @@ const Collection = () => {
 
   useEffect(() => {
     fetchCollectionData();
-  }, [collectionId]);
+  }, ["0x7bBeB929392E104BAB9f4D72d6472cf849360E8f"]);
 
   return (
     <div className="overflow-hidden">
@@ -169,12 +172,7 @@ const Collection = () => {
               <div className={style.statValue}>{nfts.length}</div>
               <div className={style.statName}>items</div>
             </div>
-            <div className={style.collectionStat}>
-              <div className={style.statValue}>
-                {collection?.allOwners ? collection.allOwners.length : ""}
-              </div>
-              <div className={style.statName}>owners</div>
-            </div>
+
             <div className={style.collectionStat}>
               <div className={style.statValue}>
                 <img
@@ -217,4 +215,4 @@ const Collection = () => {
   );
 };
 
-export default Collection;
+export default MyNfts;

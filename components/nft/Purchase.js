@@ -14,6 +14,7 @@ const style = {
 const MakeOffer = ({ isListed, selectedNft, listings, marketPlaceModule }) => {
   const [selectedMarketNft, setSelectedMarketNft] = useState();
   const [enableButton, setEnableButton] = useState(false);
+  const [inMarket, setInMarket] = useState(true);
 
   useEffect(() => {
     if (!listings || isListed === "false") return;
@@ -48,6 +49,7 @@ const MakeOffer = ({ isListed, selectedNft, listings, marketPlaceModule }) => {
       await module.buyoutListing(listingId, quantityDesired);
 
       confirmPurchase();
+      setInMarket(false);
     } catch (e) {
       console.log(e);
     }
@@ -75,7 +77,12 @@ const MakeOffer = ({ isListed, selectedNft, listings, marketPlaceModule }) => {
           </div>
         </>
       ) : (
-        <div className={`${style.button} bg-[#2081e2] hover:bg-[#42a0ff]`}>
+        <div
+          onClick={() => {
+            !inMarket ? ListItem() : null;
+          }}
+          className={`${style.button} bg-[#2081e2] hover:bg-[#42a0ff]`}
+        >
           <IoMdWallet className={style.buttonIcon} />
           <div className={style.buttonText}>List Item</div>
         </div>
